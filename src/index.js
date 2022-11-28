@@ -21,26 +21,32 @@ function onInput(evt) {
         clearInfo(infoRef)
         return;
     }
-    fetchCountries(nameCountry).then(markup => {
-        console.log(markup);
-        if (markup.length > 10) {
-            clearInfo();
+    fetchCountries(nameCountry).then(json => {
+        console.log(json);
+        if (json.length > 10) {
+            clearInfo(infoRef);
+            clearInfo(listRef);
             Notiflix.Notify.info('Too many matches found. Please enter a more specific name.')
-        } else if (markup.length > 1) {
+        } else if (json.length > 1) {
             fetchCountries(nameCountry).then(countries => {
-                markupList(markup);
+                markupList(json);
                 clearInfo(infoRef)
             }) 
 
-        } else if (markup.length === 1) {
+        } else if (json.length === 1) {
             fetchCountries(nameCountry).then(countries => {
-                markupCard(markup)
+                markupCard(json)
                 clearInfo(listRef)
             })
         }
-    }).catch(error => Notiflix.Notify.failure('Oops, there is no country with that name'))
+    }).catch(onError)
 
 }
+
+function onError() {
+    Notiflix.Notify.failure('Oops, there is no country with that name');
+}
+
 
 function markupCard(countries) {
     listRef.innerHTML = '';
