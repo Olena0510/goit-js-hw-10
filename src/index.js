@@ -11,34 +11,38 @@ const listRef = document.querySelector('.country-list');
 const infoRef = document.querySelector('.country-info');
 
 
-inputRef.addEventListener('input', debounce((onInput), DEBOUNCE_DELAY));
+inputRef.addEventListener('input', debounce(onInput, DEBOUNCE_DELAY));
 
 function onInput(evt) {
-    const nameCountry = inputRef.value.trim();
+    const nameCountry = evt.target.value.trim();
 
     if (!nameCountry) {
-        clearInfo();
-        return
+        clearInfo(listRef);
+        clearInfo(infoRef)
+        return;
     }
-    fetchCountries(nameCountry).then(markup).catch(error => Notiflix.Notify.failure(`${error}`))
+    fetchCountries(nameCountry).then(markup => {
+        console.log(markup);
+        if (markup.length > 10) {
+            clearInfo();
+            Notiflix.Notify.info('Too many matches found. Please enter a more specific name.')
+        } else if (markup.length > 1) {
+            fetchCountries(nameCountry).then(countries => {
+                markupList(markup);
+                clearInfo(infoRef)
+            }) 
+
+        } else if (markup.length === 1) {
+            fetchCountries(nameCountry).then(countries => {
+                markupCard(markup)
+                clearInfo(listRef)
+            })
+        }
+    }).catch(error => Notiflix.Notify.failure('Oops, there is no country with that name'))
 
 }
 
-function markup(countries) {
-    clearInfo();
 
-    if (countries.length === 1) {
-        markupCard(countries[0]);
-    } else if (countries.length >= 2 && countries.length <= 10) {
-        countries.forEach(markupList)
-    } else if (countries.length > 10) {
-                    clearInfo();
-                    Notiflix.Notify.info('Too many matches found. Please enter a more specific name.'
-    )   } else {
-                    Notiflix.Notify.failure('Oops, there is no country with that name');
-                }
-            }
-    
 
 function markupCard(countries) {
     listRef.innerHTML = '';
@@ -63,7 +67,6 @@ function markupList (countries) {
 }
 
 
-function clearInfo() {
-    infoRef.innerHTML = '';
-    listRef.innerHTML = '';
+function clearInfo(section) {
+    section.innerHTML = '';
 }
