@@ -42,8 +42,6 @@ function onInput(evt) {
 
 }
 
-
-
 function markupCard(countries) {
     listRef.innerHTML = '';
     const markup = countries.map((country) => {
